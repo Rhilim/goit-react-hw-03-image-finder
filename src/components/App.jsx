@@ -1,37 +1,80 @@
+import { getImages } from 'api';
+// import axios from 'axios';
 import { Component } from 'react';
+import { Notify } from 'notiflix';
+import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './LoadMoreBtn/LoadMoreBtn';
 import { Searchbar } from './Searchbar.jsx/Searchbar';
+import { ImageGalleryItem } from './ImageGalleryItem/ImageGalleryItem';
 
 export class App extends Component {
   state = {
     query: '',
     images: [],
     page: 1,
+    error: null,
+    isLoading: false,
+    totalImages: 0,
   };
 
   changeQuery = newQuery => {
     this.setState({
-      query: `${Date.now()}/${newQuery}`,
+      query: newQuery,
+      // query: `${Date.now()}/${newQuery}`,
       images: [],
       page: 1,
     });
   };
 
-  componentDidUpdate(prevProps, prevState) {
+  async componentDidUpdate(prevProps, prevState) {
     if (
       prevState.query !== this.state.query ||
       prevState.page !== this.state.page
     ) {
-      // const index = '${Date.now()}/${newQuery}';
-      // console.log(index.indexOf('newQuery'));
-      // const cutQuery = index.slice(14, index.length);
-      // console.log(cutQuery);
+      this.fetchImages();
+    }
+  }
 
-      console.log(
-        `new request ${this.state.query} and page=${this.state.page}`
+  async fetchImages() {
+    const { query, page } = this.state;
+    const options = { query, page };
+
+    try {
+      this.setState({ isLoading: true });
+
+      const { hits, totalHits } = await getImages(options);
+
+      const nextImages = hits.map(
+        ({ id, webformatURL, tags, largeImageURL }) => ({
+          id,
+          webformatURL,
+          tags,
+          largeImageURL,
+        })
       );
-      // HTTP запрос
-      // this.setState({images: результат запроса})
+
+      if (page === 1) {
+        if (!nextImages.length) {
+          Notify.failure(`There is no result for ${query}`);
+          return;
+        }
+
+        this.setState({ images: nextImages, totalImages: totalHits });
+      } else {
+        this.setState(({ images }) => ({
+          images: [...images, ...nextImages],
+        }));
+      }
+
+      this.checkLastPage({
+        page,
+        totalImages: totalHits,
+      });
+    } catch (error) {
+      this.setState({ error });
+      Notify.failure(error.message);
+    } finally {
+      this.setState({ isLoading: false });
     }
   }
 
@@ -40,14 +83,13 @@ export class App extends Component {
   };
 
   render() {
+    // const {loading} = this.state;
     return (
       <>
         <Searchbar handleSubmit={this.changeQuery}></Searchbar>
-        {/* <ImageGallery>
-          <ImageGalleryItem>
-          <Modal></Modal>
-          </ImageGalleryItem>
-        </ImageGallery> */}
+        <ImageGallery images={this.state.images}>
+          <ImageGalleryItem> </ImageGalleryItem>
+        </ImageGallery>
         <Button
           handleLoadMore={this.handleLoadMore}
           state={this.state.images}
