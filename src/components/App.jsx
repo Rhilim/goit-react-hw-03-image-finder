@@ -1,11 +1,11 @@
 import { getImages } from 'api';
-// import axios from 'axios';
 import { Component } from 'react';
 import { Notify } from 'notiflix';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './LoadMoreBtn/LoadMoreBtn';
 import { Searchbar } from './Searchbar.jsx/Searchbar';
-import { ImageGalleryItem } from './ImageGalleryItem/ImageGalleryItem';
+import { Loader } from './Loader/Loader';
+import { Wrapper } from './Wrapper';
 
 export class App extends Component {
   state = {
@@ -17,16 +17,7 @@ export class App extends Component {
     totalImages: 0,
   };
 
-  changeQuery = newQuery => {
-    this.setState({
-      query: newQuery,
-      // query: `${Date.now()}/${newQuery}`,
-      images: [],
-      page: 1,
-    });
-  };
-
-  async componentDidUpdate(prevProps, prevState) {
+  async componentDidUpdate(_, prevState) {
     if (
       prevState.query !== this.state.query ||
       prevState.page !== this.state.page
@@ -78,22 +69,40 @@ export class App extends Component {
     }
   }
 
+  handleSubmit = value => {
+    this.setState({
+      images: [],
+      query: value,
+      page: 1,
+      totalImages: 0,
+    });
+  };
+
   handleLoadMore = () => {
     this.setState(prevState => ({ page: prevState.page + 1 }));
   };
 
+  checkLastPage({ page, totalImages }) {
+    const { query } = this.state;
+    const lastPage = Math.ceil(totalImages / 12);
+
+    if (page === lastPage) {
+      Notify.success(`You have got all images for request ${query}`);
+    }
+  }
+
   render() {
-    // const {loading} = this.state;
+    const { images, totalImages, isLoading } = this.state;
+    const loadMoreVisible =
+      !isLoading && images.length !== 0 && images.length < totalImages;
     return (
       <>
-        <Searchbar handleSubmit={this.changeQuery}></Searchbar>
-        <ImageGallery images={this.state.images}>
-          <ImageGalleryItem> </ImageGalleryItem>
-        </ImageGallery>
-        <Button
-          handleLoadMore={this.handleLoadMore}
-          state={this.state.images}
-        ></Button>
+        <Searchbar onSubmit={this.handleSubmit}></Searchbar>
+        <ImageGallery images={images}></ImageGallery>
+        <Wrapper>
+          {loadMoreVisible && <Button onClick={this.handleLoadMore} />}
+          {isLoading && <Loader />}
+        </Wrapper>
       </>
     );
   }

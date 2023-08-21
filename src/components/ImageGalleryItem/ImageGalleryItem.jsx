@@ -1,8 +1,6 @@
-// import { IndModal } from 'components/Modal/Modal';
 import React, { Component } from 'react';
-
-// import { Item } from './ImageGalleryItem.styled';
 import Modal from 'react-modal';
+import { Image, Item } from './ImageGalleryItem.styled';
 
 const customStyles = {
   content: {
@@ -32,23 +30,21 @@ export class ImageGalleryItem extends Component {
   render() {
     const { imgUrl, description, largeImgUrl } = this.props;
     return (
-      <li>
-        <img src={imgUrl} alt={description} onClick={this.openModal} />
+      <Item>
+        <Image src={imgUrl} alt={description} onClick={this.openModal} />
 
         <Modal
           isOpen={this.state.isModalOpen}
           onRequestClose={this.closeModal}
           style={customStyles}
-          src={largeImgUrl} alt={description}
+          src={largeImgUrl}
+          alt={description}
         >
-          {/* <IndModal src={largeImgUrl} alt={description}>
-            <button onClick={this.closeModal}>close</button>
-          </IndModal> */}
-          <div>
-      <img src={largeImgUrl} alt={description} />
-    </div>
+          <>
+            <img src={largeImgUrl} alt={description} />
+          </>
         </Modal>
-      </li>
+      </Item>
     );
   }
 }

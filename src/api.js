@@ -11,7 +11,7 @@ const defaultParams = {
   orientation: 'horizontal',
 };
 
-export const getImages = async (query, page) => {
+export async function getImages({ query, page }) {
   const params = {
     ...defaultParams,
     q: query,
@@ -20,3 +20,16 @@ export const getImages = async (query, page) => {
   const response = await axios.get('', { params });
   return response.data;
 };
+
+
+// async function getImages({ query, page }) {
+//   const params = {
+//     ...defaultParams,
+//     q: query,
+//     page: page,
+//   };
+
+//   const response = await axios.get('', { params });
+
+//   return response.data;
+// }

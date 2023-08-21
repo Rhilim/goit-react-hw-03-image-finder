@@ -1,8 +1,9 @@
-export const Button = ({ handleLoadMore, state }) => {
-  // if (state === [])
+import { LoadMoreBtnStyled } from './LoadMoreBtn.styled';
+
+export const Button = ({ onClick }) => {
   return (
     <>
-      <button onClick={handleLoadMore}>Load more</button>
+      <LoadMoreBtnStyled onClick={onClick}>Load more</LoadMoreBtnStyled>
     </>
   );
 };
